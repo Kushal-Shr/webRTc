@@ -15,15 +15,24 @@ const RoomPage = () => {
 
   const handleCallUser = useCallback(async () => {
     try {
+      // Request access to microphone
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log("Sending audio stream:", stream);
       setMyStream(stream);
-
+  
+      // Check if microphone access was granted
+      if (stream.getAudioTracks().length === 0) {
+        console.error("No audio tracks found! Microphone may not be working.");
+      }
+  
       const offer = await peer.getOffer();
       socket.emit("user:call", { to: remoteSocketId, offer });
+  
     } catch (error) {
       console.error("Error accessing microphone:", error);
     }
   }, [remoteSocketId, socket]);
+  
 
   const handleIncomingCall = useCallback(
     async ({ from, offer }) => {
